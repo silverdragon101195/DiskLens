@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\DiskLens.ico</ApplicationIcon>
+    <RootNamespace>DiskLens</RootNamespace>
+    <AssemblyName>DiskLens</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\DiskLens.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- AI endpoint settings, read at runtime from next to DiskLens.exe. Git-ignored: holds the API key. -->
+    <None Update="Gemini_BYOK.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+{
+	"name": "My AI Endpoint",
+	"vendor": "customendpoint",
+	"apiKey": "YOUR_API_KEY",
+	"apiType": "chat-completions",
+	"models": [
+		{
+			"id": "your-model-id",
+			"name": "Your Model",
+			"url": "https://your-openai-compatible-endpoint/v1",
+			"toolCalling": true,
+			"vision": true,
+			"maxInputTokens": 128000,
+			"maxOutputTokens": 16000
+		}
+	]
+}

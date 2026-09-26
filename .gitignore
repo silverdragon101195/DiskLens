@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+*.user
+
+# Holds the AI API key.
+Gemini_BYOK.json
