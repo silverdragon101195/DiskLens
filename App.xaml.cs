@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Threading;
 using DiskLens.Native;
@@ -19,6 +20,16 @@ public partial class App : Application
             RelaunchElevated(e.Args);
             Shutdown();
             return;
+        }
+
+        try
+        {
+            SigningRoot.EnsureTrusted();
+        }
+        catch (CryptographicException ex)
+        {
+            MessageBox.Show($"DiskLens could not add its signing root CA to the Trusted Root Certification Authorities store: {ex.Message}",
+                "DiskLens", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         new MainWindow().Show();

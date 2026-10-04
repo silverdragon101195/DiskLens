@@ -54,17 +54,21 @@ Only the first entry of `models` is used. Scanning works without this file; only
 
 ## Project layout
 
-| Folder        | Contents                                                        |
-| ------------- | --------------------------------------------------------------- |
-| `Scanning/`   | Parallel directory walker and the size tree it builds           |
-| `ViewModels/` | MVVM view models for drives, results and the AI chat            |
-| `Views/`      | AI assistant panel and the Markdown renderer                    |
-| `Ai/`         | Config loader, streaming chat client and prompts                |
-| `Native/`     | Win32 interop: elevation, backup privilege, dark title bar      |
-| `Themes/`     | Dark theme resources                                            |
+| Folder        | Contents                                                                    |
+| ------------- | --------------------------------------------------------------------------- |
+| `Scanning/`   | Parallel directory walker and the size tree it builds                       |
+| `ViewModels/` | MVVM view models for drives, results and the AI chat                        |
+| `Views/`      | AI assistant panel and the Markdown renderer                                |
+| `Ai/`         | Config loader, streaming chat client and prompts                            |
+| `Native/`     | Win32 interop: elevation, backup privilege, dark title bar, signing root CA |
+| `Themes/`     | Dark theme resources                                                        |
 
 ## Notes
 
+- Builds signed with the Hoshizora code-signing certificate (made by `publish.bat`) add the Hoshizora
+  Root CA, embedded in the app, to the machine's Trusted Root Certification Authorities store when it is
+  missing there, so Windows can verify the signature; UAC names the publisher from the next launch on.
+  Unsigned builds, such as `dotnet run` or a plain `dotnet publish`, never change the certificate store.
 - Sizes are logical file sizes, not size on disk.
 - The AI sees only the path, size and largest contents of the selected item – never file contents.
 - AI answers are advice. Review them before deleting anything, and prefer the owning app's settings or
