@@ -17,6 +17,8 @@
     <SolidColorBrush x:Key="MutedBarBrush" Color="#6B7280" />
     <SolidColorBrush x:Key="BarTrackBrush" Color="#3A3C42" />
     <SolidColorBrush x:Key="WarningBrush" Color="#F0A04B" />
+    <SolidColorBrush x:Key="CautionBrush" Color="#E8C547" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="#F26B6B" />
     <SolidColorBrush x:Key="FolderIconBrush" Color="#D8B25A" />
     <SolidColorBrush x:Key="AiIconBrush" Color="#F5C542" />
     <SolidColorBrush x:Key="AiIconHoverBrush" Color="#FFE08A" />
@@ -149,6 +151,67 @@
         </Setter>
     </Style>
 
+    <!-- Read-only text that can be selected and copied, drawn like a TextBlock -->
+    <Style x:Key="SelectableText" TargetType="TextBox">
+        <Setter Property="IsReadOnly" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Foreground" Value="{StaticResource TertiaryTextBrush}" />
+        <Setter Property="SelectionBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <ScrollViewer x:Name="PART_ContentHost" Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Tabs: text headers with an accent underline under the selected one -->
+    <Style TargetType="TabControl">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabControl">
+                    <DockPanel>
+                        <TabPanel DockPanel.Dock="Top" IsItemsHost="True" Margin="0,0,0,8" />
+                        <ContentPresenter ContentSource="SelectedContent" />
+                    </DockPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="TabItem">
+        <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Border x:Name="Root" Background="Transparent" CornerRadius="4" Padding="14,6,14,4" Margin="0,0,4,0">
+                        <StackPanel>
+                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" />
+                            <Border x:Name="Underline" Height="2" CornerRadius="1" Margin="0,4,0,0" Background="Transparent" />
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{StaticResource ControlBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Underline" Property="Background" Value="{StaticResource AccentBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- CheckBox -->
     <Style TargetType="CheckBox">
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
@@ -200,6 +263,16 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style TargetType="ListBox">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style TargetType="GridSplitter">
+        <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <!-- ScrollBar: thin thumb on a transparent track, no arrow buttons -->

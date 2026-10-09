@@ -8,19 +8,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Assets\DiskLens.ico</ApplicationIcon>
-    <RootNamespace>DiskLens</RootNamespace>
-    <AssemblyName>DiskLens</AssemblyName>
+    <ApplicationIcon>Assets\SysLens.ico</ApplicationIcon>
+    <RootNamespace>SysLens</RootNamespace>
+    <AssemblyName>SysLens</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\DiskLens.ico" />
+    <Resource Include="Assets\SysLens.ico" />
     <!-- Loaded by this logical name in Native/SigningRoot.cs. -->
     <EmbeddedResource Include="Assets\HoshizoraRootCA.crt" LogicalName="HoshizoraRootCA.crt" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- AI endpoint settings, read at runtime from next to DiskLens.exe. Git-ignored: holds the API key. -->
+    <!-- AI endpoint settings, read at runtime from next to SysLens.exe. Git-ignored: holds the API key. -->
     <None Update="Gemini_BYOK.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

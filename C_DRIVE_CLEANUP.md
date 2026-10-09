@@ -8,7 +8,7 @@ and [mklink.bat](mklink.bat) links profile caches and app data to `H:\UserData`.
 ## 1. Measure
 
 Prints the size of each usual hotspot, or its target when the folder links to another drive.
-For anything not listed, scan C: with DiskLens.
+For anything not listed, scan C: with SysLens.
 
 ```powershell
 function Get-FolderBytes([string]$Path) {

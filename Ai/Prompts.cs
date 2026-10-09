@@ -1,14 +1,14 @@
 using System.IO;
 using System.Text;
-using DiskLens.ViewModels;
+using SysLens.ViewModels;
 
-namespace DiskLens.Ai;
+namespace SysLens.Ai;
 
 public static class Prompts
 {
     private const int ListedChildren = 12;
 
-    public const string System =
+    private const string System =
         """
         You are a Windows storage expert helping a user free disk space. The user shows you one
         folder or file found by a disk-usage scanner, with its size and largest contents.
@@ -26,10 +26,13 @@ public static class Prompts
           which apps must be closed first. Mention backing up anything that holds user data.
         """;
 
-    public const string InitialQuestionDisplay =
+    private const string InitialQuestionDisplay =
         "What is this, which app does it belong to, can it be deleted, and how to delete it safely?";
 
-    public static string InitialQuestion(FolderItem item)
+    public static AssistantTopic ForItem(FolderItem item) =>
+        new(item.FullPath, System, InitialQuestion(item), InitialQuestionDisplay);
+
+    private static string InitialQuestion(FolderItem item)
     {
         var text = new StringBuilder();
         text.AppendLine(Describe(item));

@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace DiskLens.ViewModels;
+namespace SysLens.ViewModels;
 
 public sealed class DriveOption : ObservableObject
 {

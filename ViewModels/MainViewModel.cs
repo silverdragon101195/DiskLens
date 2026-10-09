@@ -2,9 +2,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Threading;
-using DiskLens.Scanning;
+using SysLens.Scanning;
 
-namespace DiskLens.ViewModels;
+namespace SysLens.ViewModels;
 
 public sealed class MainViewModel : ObservableObject
 {
@@ -26,6 +26,8 @@ public sealed class MainViewModel : ObservableObject
     public string PrivilegeStatus { get; }
 
     public AssistantViewModel Assistant { get; } = new();
+
+    public UsbViewModel Usb { get; } = new();
 
     public string Status
     {

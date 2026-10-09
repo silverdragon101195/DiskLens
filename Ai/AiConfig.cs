@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text.Json;
 
-namespace DiskLens.Ai;
+namespace SysLens.Ai;
 
 /// <summary>
 /// Endpoint settings read from a BYOK JSON file next to the executable
@@ -16,7 +16,7 @@ public sealed record AiConfig(string Endpoint, string Model, string ApiKey)
     public static AiConfig Load()
     {
         if (!File.Exists(FilePath))
-            throw new AiConfigException($"AI config not found. Put {FileName} next to DiskLens.exe ({AppContext.BaseDirectory}).");
+            throw new AiConfigException($"AI config not found. Put {FileName} next to SysLens.exe ({AppContext.BaseDirectory}).");
 
         try
         {

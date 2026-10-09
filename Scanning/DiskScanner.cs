@@ -1,7 +1,7 @@
 using System.IO;
 using System.IO.Enumeration;
 
-namespace DiskLens.Scanning;
+namespace SysLens.Scanning;
 
 /// <summary>
 /// Walks a directory tree and totals the logical size of the files beneath each folder.

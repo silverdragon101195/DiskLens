@@ -6,9 +6,9 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using DiskLens.ViewModels;
+using SysLens.ViewModels;
 
-namespace DiskLens.Views;
+namespace SysLens.Views;
 
 /// <summary>
 /// Renders <see cref="AssistantViewModel.Entries"/> into one read-only FlowDocument, one Section per

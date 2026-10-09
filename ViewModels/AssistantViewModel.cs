@@ -3,9 +3,9 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using DiskLens.Ai;
+using SysLens.Ai;
 
-namespace DiskLens.ViewModels;
+namespace SysLens.ViewModels;
 
 public enum ChatRole
 {
@@ -34,23 +34,23 @@ public sealed class ChatEntry(ChatRole role, string text) : ObservableObject
     }
 }
 
-/// <summary>A conversation with the AI about one folder or file from the result tree.</summary>
+/// <summary>A conversation with the AI about one item: a folder or file, or a USB device.</summary>
 public sealed class AssistantViewModel : ObservableObject
 {
     private ChatClient? _client;
     private List<ChatMessage> _history = [];
     private CancellationTokenSource? _cts;
-    private FolderItem? _target;
+    private AssistantTopic? _topic;
     private string _input = "";
     private bool _isOpen;
     private bool _isBusy;
 
     public ObservableCollection<ChatEntry> Entries { get; } = [];
 
-    public FolderItem? Target
+    public AssistantTopic? Topic
     {
-        get => _target;
-        private set => Set(ref _target, value);
+        get => _topic;
+        private set => Set(ref _topic, value);
     }
 
     public string Input
@@ -77,22 +77,22 @@ public sealed class AssistantViewModel : ObservableObject
 
     public bool IsIdle => !IsBusy;
 
-    public Task StartAsync(FolderItem item)
+    public Task StartAsync(AssistantTopic topic)
     {
         Stop();
         // A new list, not Clear(): a reply still finishing for the previous item appends to its own history.
-        _history = [new ChatMessage("system", Prompts.System)];
+        _history = [new ChatMessage("system", topic.SystemPrompt)];
         Entries.Clear();
-        Target = item;
+        Topic = topic;
         Input = "";
         IsOpen = true;
-        return SendAsync(Prompts.InitialQuestion(item), Prompts.InitialQuestionDisplay);
+        return SendAsync(topic.Question, topic.QuestionDisplay);
     }
 
     public Task SendInputAsync()
     {
         var text = Input.Trim();
-        if (text.Length == 0 || IsBusy || Target is null)
+        if (text.Length == 0 || IsBusy || Topic is null)
             return Task.CompletedTask;
 
         Input = "";

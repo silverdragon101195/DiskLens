@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.IO;
-using DiskLens.Scanning;
+using SysLens.Scanning;
 
-namespace DiskLens.ViewModels;
+namespace SysLens.ViewModels;
 
 /// <summary>
 /// A row in the result tree. Child rows are built on first expand so huge trees stay cheap;

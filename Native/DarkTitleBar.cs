@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace DiskLens.Native;
+namespace SysLens.Native;
 
 internal static partial class DarkTitleBar
 {

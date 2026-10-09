@@ -1,4 +1,4 @@
-namespace DiskLens.Scanning;
+namespace SysLens.Scanning;
 
 public sealed class DirNode(string name, string fullPath)
 {

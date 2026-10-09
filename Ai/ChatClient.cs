@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
-namespace DiskLens.Ai;
+namespace SysLens.Ai;
 
 public sealed record ChatMessage(string Role, string Content);
 
@@ -75,7 +75,7 @@ public sealed class ChatClient(AiConfig config)
     {
         var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
         // The gateway sits behind Cloudflare, which rejects requests without a User-Agent.
-        http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("DiskLens", "1.0"));
+        http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("SysLens", "1.0"));
         return http;
     }
 

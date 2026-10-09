@@ -1,4 +1,4 @@
-namespace DiskLens.ViewModels;
+namespace SysLens.ViewModels;
 
 public static class Bytes
 {

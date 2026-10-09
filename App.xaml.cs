@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Threading;
-using DiskLens.Native;
+using SysLens.Native;
 
-namespace DiskLens;
+namespace SysLens;
 
 public partial class App : Application
 {
@@ -28,8 +28,8 @@ public partial class App : Application
         }
         catch (CryptographicException ex)
         {
-            MessageBox.Show($"DiskLens could not add its signing root CA to the Trusted Root Certification Authorities store: {ex.Message}",
-                "DiskLens", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show($"SysLens could not add its signing root CA to the Trusted Root Certification Authorities store: {ex.Message}",
+                "SysLens", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
         new MainWindow().Show();
@@ -55,14 +55,14 @@ public partial class App : Application
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == ErrorCancelled)
         {
-            MessageBox.Show("DiskLens needs administrator rights to read every folder on the selected drives.",
-                "DiskLens", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("SysLens needs administrator rights to read every folder on the selected drives.",
+                "SysLens", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
     private void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        MessageBox.Show(e.Exception.Message, "DiskLens", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show(e.Exception.Message, "SysLens", MessageBoxButton.OK, MessageBoxImage.Error);
         e.Handled = true;
     }
 }

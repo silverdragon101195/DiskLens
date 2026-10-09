@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
-using DiskLens.Native;
-using DiskLens.ViewModels;
+using SysLens.Ai;
+using SysLens.Native;
+using SysLens.ViewModels;
 
-namespace DiskLens;
+namespace SysLens;
 
 public partial class MainWindow : Window
 {
@@ -15,12 +16,14 @@ public partial class MainWindow : Window
         InitializeComponent();
         _viewModel = new MainViewModel(DescribePrivileges());
         DataContext = _viewModel;
+        Loaded += async (_, _) => await _viewModel.Usb.RefreshAsync();
     }
 
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
         DarkTitleBar.Apply(this);
+        DeviceChanges.Watch(this, _viewModel.Usb.ScheduleRefresh);
     }
 
     // App.OnStartup only opens this window once the process is elevated.
@@ -51,17 +54,34 @@ public partial class MainWindow : Window
     private async void AskAi_Click(object sender, RoutedEventArgs e)
     {
         if (ItemOf(sender) is { } item)
-            await _viewModel.Assistant.StartAsync(item);
+            await _viewModel.Assistant.StartAsync(Prompts.ForItem(item));
     }
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
     {
-        if (ItemOf(sender) is not { } item)
-            return;
+        if (ItemOf(sender) is { } item)
+            CopyText(item.FullPath);
+    }
 
+    private async void UsbRefresh_Click(object sender, RoutedEventArgs e) => await _viewModel.Usb.RefreshAsync();
+
+    private async void UsbAskAi_Click(object sender, RoutedEventArgs e)
+    {
+        if (UsbItemOf(sender) is { } item)
+            await _viewModel.Assistant.StartAsync(UsbPrompts.ForDevice(item));
+    }
+
+    private void CopyInstanceId_Click(object sender, RoutedEventArgs e)
+    {
+        if (UsbItemOf(sender) is { } item)
+            CopyText(item.InstanceId);
+    }
+
+    private static void CopyText(string text)
+    {
         try
         {
-            Clipboard.SetText(item.FullPath);
+            Clipboard.SetText(text);
         }
         catch (ExternalException)
         {
@@ -71,4 +91,7 @@ public partial class MainWindow : Window
 
     private static FolderItem? ItemOf(object sender) =>
         sender is FrameworkElement { DataContext: FolderItem { HasPath: true } item } ? item : null;
+
+    private static UsbDeviceItem? UsbItemOf(object sender) =>
+        sender is FrameworkElement { DataContext: UsbDeviceItem item } ? item : null;
 }

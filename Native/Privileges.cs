@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-namespace DiskLens.Native;
+namespace SysLens.Native;
 
 internal static partial class Privileges
 {

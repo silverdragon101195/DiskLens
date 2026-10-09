@@ -4,10 +4,10 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 
-namespace DiskLens.Native;
+namespace SysLens.Native;
 
 /// <summary>
-/// The root CA that issued DiskLens's code-signing certificate, embedded so a signed build can make
+/// The root CA that issued SysLens's code-signing certificate, embedded so a signed build can make
 /// Windows trust its own signature.
 /// </summary>
 internal static class SigningRoot

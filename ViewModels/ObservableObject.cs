@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace DiskLens.ViewModels;
+namespace SysLens.ViewModels;
 
 public abstract class ObservableObject : INotifyPropertyChanged
 {
