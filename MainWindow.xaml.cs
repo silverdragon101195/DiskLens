@@ -16,7 +16,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         _viewModel = new MainViewModel(DescribePrivileges());
         DataContext = _viewModel;
-        Loaded += async (_, _) => await _viewModel.Usb.RefreshAsync();
+        Loaded += async (_, _) => await Task.WhenAll(_viewModel.Usb.RefreshAsync(), _viewModel.Rgb.StartAsync());
+        // Hands the ASUS Aura devices back to Armoury Crate and stops the Aura host process.
+        Closed += (_, _) => _viewModel.Rgb.Dispose();
     }
 
     protected override void OnSourceInitialized(EventArgs e)
@@ -75,6 +77,20 @@ public partial class MainWindow : Window
     {
         if (UsbItemOf(sender) is { } item)
             CopyText(item.InstanceId);
+    }
+
+    private async void RgbRefresh_Click(object sender, RoutedEventArgs e) => await _viewModel.Rgb.RefreshAsync();
+
+    private async void RgbTakeControl_Click(object sender, RoutedEventArgs e) => await _viewModel.Rgb.TakeControlAsync();
+
+    private async void RgbRelease_Click(object sender, RoutedEventArgs e) => await _viewModel.Rgb.ReleaseAsync();
+
+    private void RgbSyncAll_Click(object sender, RoutedEventArgs e) => _viewModel.Rgb.SyncAll();
+
+    private void RgbUseForAll_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: RgbTargetItem item })
+            _viewModel.Rgb.UseForAll(item);
     }
 
     private static void CopyText(string text)

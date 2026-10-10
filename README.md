@@ -1,7 +1,8 @@
 # SysLens
 
 A Windows system inspector built with WPF on .NET 10. It shows where disk space goes and how USB devices
-are wired together, with an AI assistant that explains any folder, file, device or hub you point it at.
+are wired together, with an AI assistant that explains any folder, file, device or hub you point it at, and
+runs lighting effects on every RGB device it can reach.
 
 ![SysLens icon](Assets/SysLens.png)
 
@@ -32,6 +33,22 @@ are wired together, with an AI assistant that explains any folder, file, device 
   A device removed within seconds of arriving is flagged in red: it most likely failed to enumerate.
 - **Live** – refreshes by itself shortly after a device is plugged in or removed.
 
+### RGB
+
+- **Every device in one list** – ASUS Aura SDK devices (motherboard, memory, graphics card, ROG displays,
+  mice, keyboards and whatever else Armoury Crate's plugins expose) and Windows Dynamic Lighting
+  (LampArray) devices, each with its LED count, who drives it now and a live preview of its LEDs.
+- **Effects** – off, static, breathing, flash, colour cycle, rainbow wave, gradient, colour shift, comet
+  and twinkle, with a colour picker (hue, saturation and value, hex, presets), a second colour where the
+  effect uses one, speed, brightness and direction.
+- **Sync** – every device follows **All devices** by default, so one set of settings runs on all of them in
+  step. Untick **Follow All devices** to give a device its own effect, or **Use for every device** to
+  copy its settings to all.
+- **Control** – Armoury Crate keeps the Aura devices until you change an effect or press **Take control**.
+  **Release to Armoury Crate**, **Refresh** or closing SysLens hands them back. Effects are rendered by
+  SysLens, so they run only while it is open. Windows gives Dynamic Lighting devices to SysLens only while
+  it is the foreground app; otherwise Windows' own ambient effect runs.
+
 ### Ask AI
 
 Right-click any row, or press its **?** button, to ask what it is. For a folder or file: which app owns
@@ -43,10 +60,11 @@ Dark theme with a dark title bar throughout.
 
 ## Requirements
 
-- Windows 10 or 11
+- Windows 10 (1809) or 11
 - [.NET 10 SDK](https://dotnet.microsoft.com/download) (to build) or .NET 10 Desktop Runtime (to run)
 - Administrator rights – the app relaunches itself through UAC when started unelevated
 - For the AI assistant: an OpenAI-compatible Chat Completions endpoint and API key
+- For RGB: the ASUS Aura SDK, which Armoury Crate installs, and/or Dynamic Lighting devices (Windows 11)
 
 ## Build and run
 
@@ -83,8 +101,9 @@ needs it.
 | ------------- | ------------------------------------------------------------------------------------------------------------ |
 | `Scanning/`   | Parallel directory walker and the size tree it builds                                                        |
 | `Usb/`        | USB device record and Device Manager problem codes                                                           |
-| `ViewModels/` | MVVM view models for drives, results, the USB tree and the AI chat                                           |
-| `Views/`      | AI assistant panel, the Markdown renderer and value converters                                               |
+| `ViewModels/` | MVVM view models for drives, results, the USB tree, RGB devices and the AI chat                              |
+| `Views/`      | AI assistant panel, colour picker, the Markdown renderer and value converters                                |
+| `Lighting/`   | Effect renderer and render loop, the ASUS Aura host process and its client, Dynamic Lighting devices         |
 | `Ai/`         | Config loader, streaming chat client and prompts                                                             |
 | `Native/`     | Win32 interop: elevation, backup privilege, dark title bar, signing root CA, USB enumeration, device changes |
 | `Themes/`     | Dark theme resources                                                                                         |
@@ -95,6 +114,10 @@ needs it.
   Root CA, embedded in the app, to the machine's Trusted Root Certification Authorities store when it is
   missing there, so Windows can verify the signature; UAC names the publisher from the next launch on.
   Unsigned builds, such as `dotnet run` or a plain `dotnet publish`, never change the certificate store.
+- The ASUS Aura SDK loads every vendor's lighting plugin into the process that calls it, so SysLens runs
+  it in a child process (`SysLens.exe --aura-host`). A failing plugin ends only that process; when SysLens
+  exits, even abnormally, the child hands the devices back to Armoury Crate and exits too. Its first device
+  scan can take up to a minute while the plugins load.
 - Sizes are logical file sizes, not size on disk.
 - The AI sees only the path, size and largest contents of a disk item, never file contents. For a USB
   device it sees the name, VID:PID, status, port location and hub chain, never the instance id, which

@@ -29,6 +29,8 @@ public sealed class MainViewModel : ObservableObject
 
     public UsbViewModel Usb { get; } = new();
 
+    public RgbViewModel Rgb { get; } = new();
+
     public string Status
     {
         get => _status;

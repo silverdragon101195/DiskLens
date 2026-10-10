@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:SysLens.ViewModels"
         xmlns:views="clr-namespace:SysLens.Views"
+        xmlns:lighting="clr-namespace:SysLens.Lighting"
         Title="SysLens" Icon="Assets/SysLens.ico" Height="800" Width="1440" MinWidth="820" MinHeight="480"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterScreen" WindowState="Maximized"
         Background="{StaticResource WindowBrush}" Foreground="{StaticResource TextBrush}" FontFamily="Segoe UI" FontSize="14">
 
     <Window.Resources>
@@ -93,6 +94,126 @@
                          Margin="22,1,0,0" ToolTip="{Binding HubChainText}" />
             </StackPanel>
         </DataTemplate>
+
+        <Style x:Key="SectionLabel" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- RGB device list row: a card with an accent border when selected -->
+        <Style x:Key="DeviceCard" TargetType="ListBoxItem">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Root" Background="Transparent" BorderBrush="Transparent" BorderThickness="1"
+                                CornerRadius="6" Padding="10,8" Margin="0,0,0,4">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource ControlBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource SelectionBrush}" />
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Colour slot selector: the slot's colour with its label; Tag holds the colour brush -->
+        <Style x:Key="ColorSlot" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Margin" Value="0,0,8,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Root" Background="{StaticResource ControlBrush}" BorderBrush="Transparent"
+                                BorderThickness="1.5" CornerRadius="4" Padding="6,3,10,3">
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="16" Height="16" CornerRadius="3" Background="{TemplateBinding Tag}"
+                                        BorderBrush="{StaticResource PanelBorderBrush}" BorderThickness="1" />
+                                <ContentPresenter Margin="6,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{StaticResource ControlHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Effect, colours, speed, brightness and direction for one device or for All devices -->
+        <DataTemplate x:Key="EffectEditorTemplate" DataType="{x:Type vm:EffectEditor}">
+            <StackPanel>
+                <TextBlock Text="Effect" Style="{StaticResource SectionLabel}" />
+                <ListBox Style="{StaticResource ChipList}" ItemsSource="{x:Static lighting:EffectInfo.All}" SelectedItem="{Binding Effect}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type lighting:EffectInfo}">
+                            <TextBlock Text="{Binding Name}" ToolTip="{Binding Description}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Text="{Binding Effect.Description}" FontSize="12" Foreground="{StaticResource TertiaryTextBrush}" />
+
+                <StackPanel Margin="0,16,0,0" Visibility="{Binding ShowColors, Converter={StaticResource BoolToVisibility}}">
+                    <WrapPanel>
+                        <TextBlock Text="Colour" Style="{StaticResource SectionLabel}" Margin="0,0,12,6" />
+                        <StackPanel Orientation="Horizontal"
+                                    Visibility="{Binding Effect.UsesSecondColor, Converter={StaticResource BoolToVisibility}}">
+                            <RadioButton Style="{StaticResource ColorSlot}" Content="Colour 1" Tag="{Binding ColorBrush}"
+                                         IsChecked="{Binding IsEditingFirstColor}" />
+                            <RadioButton Style="{StaticResource ColorSlot}" Content="Colour 2" Tag="{Binding SecondColorBrush}"
+                                         IsChecked="{Binding IsEditingSecondColor}" />
+                        </StackPanel>
+                    </WrapPanel>
+                    <views:ColorPicker Color="{Binding EditingColor}" />
+                </StackPanel>
+
+                <Grid Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="48" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Speed" Style="{StaticResource SectionLabel}" Margin="0"
+                               Visibility="{Binding Effect.UsesSpeed, Converter={StaticResource BoolToVisibility}}" />
+                    <!-- EffectSettings.MinSpeed to MaxSpeed -->
+                    <Slider Grid.Column="1" Minimum="1" Maximum="10" IsSnapToTickEnabled="True" TickFrequency="1"
+                            Value="{Binding Speed}" Visibility="{Binding Effect.UsesSpeed, Converter={StaticResource BoolToVisibility}}" />
+                    <TextBlock Grid.Column="2" Text="{Binding Speed}" TextAlignment="Right" VerticalAlignment="Center"
+                               Visibility="{Binding Effect.UsesSpeed, Converter={StaticResource BoolToVisibility}}" />
+
+                    <TextBlock Grid.Row="1" Text="Brightness" Style="{StaticResource SectionLabel}" Margin="0,8,0,0" />
+                    <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" IsSnapToTickEnabled="True" TickFrequency="1"
+                            SmallChange="5" LargeChange="10" Value="{Binding Brightness}" Margin="0,8,0,0" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Brightness, StringFormat={}{0}%}" TextAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,8,0,0" />
+                </Grid>
+
+                <CheckBox Content="Reverse direction" IsChecked="{Binding Reverse}" Padding="6,0,0,0" Margin="0,12,0,0"
+                          Visibility="{Binding Effect.UsesDirection, Converter={StaticResource BoolToVisibility}}" />
+            </StackPanel>
+        </DataTemplate>
     </Window.Resources>
 
     <Grid Margin="12">
@@ -120,150 +241,157 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="310" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
 
-                    <!-- Drive picker -->
-                    <Border Grid.Column="0" Style="{StaticResource PanelBorder}" Margin="0,0,10,0">
-                        <DockPanel>
-                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
-                                <Button DockPanel.Dock="Right" Content="Refresh" Padding="10,3"
-                                        IsEnabled="{Binding IsIdle}" Click="Refresh_Click" />
-                                <TextBlock Text="Drives" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <!-- Drives and the scan results; the splitter resizes the drive picker. -->
+                    <Grid views:SidePane.IsEnabled="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="310" MinWidth="220" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" MinWidth="360" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Drive picker -->
+                        <Border Style="{StaticResource PanelBorder}">
+                            <DockPanel>
+                                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                                    <Button DockPanel.Dock="Right" Content="Refresh" Padding="10,3"
+                                            IsEnabled="{Binding IsIdle}" Click="Refresh_Click" />
+                                    <TextBlock Text="Drives" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                </DockPanel>
+
+                                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,10,0,0">
+                                    <!-- Scan and Cancel share one slot: only one is visible at a time. -->
+                                    <Button Content="Scan" Style="{StaticResource PrimaryActionButton}" IsDefault="True"
+                                            Visibility="{Binding IsIdle, Converter={StaticResource BoolToVisibility}}" Click="Scan_Click" />
+                                    <Button Content="Cancel" Style="{StaticResource ActionButton}"
+                                            Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}}" Click="Cancel_Click" />
+                                </StackPanel>
+
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding Drives}" IsEnabled="{Binding IsIdle}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type vm:DriveOption}">
+                                                <CheckBox IsChecked="{Binding IsSelected}" Margin="0,6" VerticalContentAlignment="Top">
+                                                    <StackPanel Margin="6,-2,0,0">
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                        <ProgressBar Value="{Binding UsedPercent, Mode=OneWay}" Height="6" Width="230"
+                                                                     HorizontalAlignment="Left" Margin="0,4" />
+                                                        <TextBlock Text="{Binding Summary}" Foreground="{StaticResource SecondaryTextBrush}" FontSize="12" />
+                                                    </StackPanel>
+                                                </CheckBox>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
                             </DockPanel>
+                        </Border>
 
-                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,10,0,0">
-                                <!-- Scan and Cancel share one slot: only one is visible at a time. -->
-                                <Button Content="Scan" Style="{StaticResource PrimaryActionButton}" IsDefault="True"
-                                        Visibility="{Binding IsIdle, Converter={StaticResource BoolToVisibility}}" Click="Scan_Click" />
-                                <Button Content="Cancel" Style="{StaticResource ActionButton}"
-                                        Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisibility}}" Click="Cancel_Click" />
-                            </StackPanel>
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" />
 
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <ItemsControl ItemsSource="{Binding Drives}" IsEnabled="{Binding IsIdle}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate DataType="{x:Type vm:DriveOption}">
-                                            <CheckBox IsChecked="{Binding IsSelected}" Margin="0,6" VerticalContentAlignment="Top">
-                                                <StackPanel Margin="6,-2,0,0">
-                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                                                    <ProgressBar Value="{Binding UsedPercent, Mode=OneWay}" Height="6" Width="230"
-                                                                 HorizontalAlignment="Left" Margin="0,4" />
-                                                    <TextBlock Text="{Binding Summary}" Foreground="{StaticResource SecondaryTextBrush}" FontSize="12" />
-                                                </StackPanel>
-                                            </CheckBox>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </DockPanel>
-                    </Border>
+                        <!-- Results -->
+                        <Border Grid.Column="2" Style="{StaticResource PanelBorder}" Padding="4">
+                            <TreeView ItemsSource="{Binding Results}" BorderThickness="0"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling">
+                                <TreeView.ItemContainerStyle>
+                                    <Style TargetType="TreeViewItem">
+                                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                        <Setter Property="Padding" Value="2,3" />
+                                    </Style>
+                                </TreeView.ItemContainerStyle>
+                                <TreeView.ItemTemplate>
+                                    <HierarchicalDataTemplate DataType="{x:Type vm:FolderItem}" ItemsSource="{Binding Children}">
+                                        <StackPanel Orientation="Horizontal" Background="Transparent" ToolTip="{Binding FullPath}">
+                                            <StackPanel.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="Open in Explorer" Click="OpenInExplorer_Click"
+                                                              IsEnabled="{Binding HasPath}" />
+                                                    <MenuItem Header="Copy path" Click="CopyPath_Click"
+                                                              IsEnabled="{Binding HasPath}" />
+                                                    <MenuItem Header="Ask AI" Click="AskAi_Click"
+                                                              IsEnabled="{Binding HasPath}" />
+                                                </ContextMenu>
+                                            </StackPanel.ContextMenu>
 
-                    <!-- Results -->
-                    <Border Grid.Column="1" Style="{StaticResource PanelBorder}" Padding="4">
-                        <TreeView ItemsSource="{Binding Results}" BorderThickness="0"
-                                  VirtualizingPanel.IsVirtualizing="True"
-                                  VirtualizingPanel.VirtualizationMode="Recycling">
-                            <TreeView.ItemContainerStyle>
-                                <Style TargetType="TreeViewItem">
-                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                                    <Setter Property="Padding" Value="2,3" />
-                                </Style>
-                            </TreeView.ItemContainerStyle>
-                            <TreeView.ItemTemplate>
-                                <HierarchicalDataTemplate DataType="{x:Type vm:FolderItem}" ItemsSource="{Binding Children}">
-                                    <StackPanel Orientation="Horizontal" Background="Transparent" ToolTip="{Binding FullPath}">
-                                        <StackPanel.ContextMenu>
-                                            <ContextMenu>
-                                                <MenuItem Header="Open in Explorer" Click="OpenInExplorer_Click"
-                                                          IsEnabled="{Binding HasPath}" />
-                                                <MenuItem Header="Copy path" Click="CopyPath_Click"
-                                                          IsEnabled="{Binding HasPath}" />
-                                                <MenuItem Header="Ask AI" Click="AskAi_Click"
-                                                          IsEnabled="{Binding HasPath}" />
-                                            </ContextMenu>
-                                        </StackPanel.ContextMenu>
+                                            <Border Width="80" Height="10" Background="{StaticResource BarTrackBrush}" CornerRadius="2" VerticalAlignment="Center">
+                                                <Border HorizontalAlignment="Left" Width="{Binding BarWidth}" CornerRadius="2">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsDrive}" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource AccentStrongBrush}" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsFile}" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource MutedBarBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                            </Border>
 
-                                        <Border Width="80" Height="10" Background="{StaticResource BarTrackBrush}" CornerRadius="2" VerticalAlignment="Center">
-                                            <Border HorizontalAlignment="Left" Width="{Binding BarWidth}" CornerRadius="2">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+                                            <TextBlock Text="{Binding SizeText}" Width="90" TextAlignment="Right" Margin="8,0,0,0"
+                                                       FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding PercentText}" Width="62" TextAlignment="Right" Foreground="{StaticResource SecondaryTextBrush}" />
+
+                                            <!-- Glyphs: E8B7 folder, E8A5 document, EDA2 hard drive -->
+                                            <TextBlock Margin="12,0,0,0" Width="16" VerticalAlignment="Center" FontSize="15"
+                                                       FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="&#xE8B7;" />
+                                                        <Setter Property="Foreground" Value="{StaticResource FolderIconBrush}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsDrive}" Value="True">
-                                                                <Setter Property="Background" Value="{StaticResource AccentStrongBrush}" />
+                                                                <Setter Property="Text" Value="&#xEDA2;" />
+                                                                <Setter Property="Foreground" Value="{StaticResource AccentStrongBrush}" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsFile}" Value="True">
-                                                                <Setter Property="Background" Value="{StaticResource MutedBarBrush}" />
+                                                                <Setter Property="Text" Value="&#xE8A5;" />
+                                                                <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding HasPath}" Value="False">
+                                                                <Setter Property="Text" Value="" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
-                                                </Border.Style>
-                                            </Border>
-                                        </Border>
+                                                </TextBlock.Style>
+                                            </TextBlock>
 
-                                        <TextBlock Text="{Binding SizeText}" Width="90" TextAlignment="Right" Margin="8,0,0,0"
-                                                   FontWeight="SemiBold" />
-                                        <TextBlock Text="{Binding PercentText}" Width="62" TextAlignment="Right" Foreground="{StaticResource SecondaryTextBrush}" />
+                                            <TextBlock Text="{Binding Name}" Margin="8,0,0,0">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsDrive}" Value="True">
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                                <Setter Property="FontSize" Value="16" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsFile}" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsUnreadable}" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Details}" Margin="10,0,0,0" Foreground="{StaticResource TertiaryTextBrush}" FontSize="12"
+                                                       VerticalAlignment="Center" />
+                                            <!-- E897: help glyph -->
+                                            <Button Style="{StaticResource AiIconButton}" Content="&#xE897;" Margin="6,0,0,0" Padding="4,1"
+                                                    ToolTip="Ask AI: what is this, can it be deleted, how to delete it safely"
+                                                    Visibility="{Binding HasPath, Converter={StaticResource BoolToVisibility}}"
+                                                    Click="AskAi_Click" />
+                                        </StackPanel>
+                                    </HierarchicalDataTemplate>
+                                </TreeView.ItemTemplate>
+                            </TreeView>
+                        </Border>
+                    </Grid>
 
-                                        <!-- Glyphs: E8B7 folder, E8A5 document, EDA2 hard drive -->
-                                        <TextBlock Margin="12,0,0,0" Width="16" VerticalAlignment="Center" FontSize="15"
-                                                   FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="&#xE8B7;" />
-                                                    <Setter Property="Foreground" Value="{StaticResource FolderIconBrush}" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsDrive}" Value="True">
-                                                            <Setter Property="Text" Value="&#xEDA2;" />
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentStrongBrush}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsFile}" Value="True">
-                                                            <Setter Property="Text" Value="&#xE8A5;" />
-                                                            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding HasPath}" Value="False">
-                                                            <Setter Property="Text" Value="" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-
-                                        <TextBlock Text="{Binding Name}" Margin="8,0,0,0">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsDrive}" Value="True">
-                                                            <Setter Property="FontWeight" Value="Bold" />
-                                                            <Setter Property="FontSize" Value="16" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsFile}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsUnreadable}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Details}" Margin="10,0,0,0" Foreground="{StaticResource TertiaryTextBrush}" FontSize="12"
-                                                   VerticalAlignment="Center" />
-                                        <!-- E897: help glyph -->
-                                        <Button Style="{StaticResource AiIconButton}" Content="&#xE897;" Margin="6,0,0,0" Padding="4,1"
-                                                ToolTip="Ask AI: what is this, can it be deleted, how to delete it safely"
-                                                Visibility="{Binding HasPath, Converter={StaticResource BoolToVisibility}}"
-                                                Click="AskAi_Click" />
-                                    </StackPanel>
-                                </HierarchicalDataTemplate>
-                            </TreeView.ItemTemplate>
-                        </TreeView>
-                    </Border>
-
-                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Status}" Margin="2,10,2,0"
+                    <TextBlock Grid.Row="1" Text="{Binding Status}" Margin="2,10,2,0"
                                Foreground="{StaticResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" />
                 </Grid>
             </TabItem>
@@ -361,9 +489,184 @@
                                Foreground="{StaticResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" />
                 </Grid>
             </TabItem>
+
+            <!-- RGB lighting -->
+            <TabItem Header="RGB" DataContext="{Binding Rgb}" IsSelected="{Binding IsActive, Mode=OneWayToSource}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Margin="2,0,0,8">
+                        <Button DockPanel.Dock="Right" Content="Refresh" Padding="10,3" VerticalAlignment="Center"
+                                IsEnabled="{Binding IsIdle}" Click="RgbRefresh_Click"
+                                ToolTip="Read the devices again; restarts the ASUS Aura connection" />
+                        <Button DockPanel.Dock="Right" Content="Release to Armoury Crate" Padding="10,3" Margin="0,0,8,0"
+                                VerticalAlignment="Center" IsEnabled="{Binding IsIdle}" Click="RgbRelease_Click"
+                                Visibility="{Binding IsAuraInControl, Converter={StaticResource BoolToVisibility}}"
+                                ToolTip="Hand the ASUS Aura devices back to Armoury Crate" />
+                        <Button DockPanel.Dock="Right" Content="Take control" Padding="10,3" Margin="0,0,8,0"
+                                VerticalAlignment="Center" IsEnabled="{Binding IsIdle}" Click="RgbTakeControl_Click"
+                                Visibility="{Binding CanTakeControl, Converter={StaticResource BoolToVisibility}}"
+                                ToolTip="Take the ASUS Aura devices from Armoury Crate and show the effects set here" />
+                        <StackPanel>
+                            <TextBlock Text="{Binding Summary}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock FontSize="12" Margin="0,2,0,0" Foreground="{StaticResource TertiaryTextBrush}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Text="Effects run while SysLens is open; closing it hands ASUS Aura back to Armoury Crate. Dynamic Lighting devices follow SysLens only while it is in front." />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Devices and the selected one's settings; the splitter resizes the device list. -->
+                    <Grid Grid.Row="1" views:SidePane.IsEnabled="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="400" MinWidth="260" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" MinWidth="360" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Devices -->
+                        <Border Style="{StaticResource PanelBorder}" Padding="4">
+                            <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}"
+                                     ItemContainerStyle="{StaticResource DeviceCard}" HorizontalContentAlignment="Stretch"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <!-- The busy spinner sits right below the cards, where the devices being read will appear. -->
+                                <ListBox.Template>
+                                    <ControlTemplate TargetType="ListBox">
+                                        <ScrollViewer Focusable="False" CanContentScroll="False" Padding="{TemplateBinding Padding}"
+                                                      HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                            <StackPanel>
+                                                <ItemsPresenter />
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="12,20"
+                                                            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+                                                    <Control Style="{StaticResource Spinner}" VerticalAlignment="Center" />
+                                                    <StackPanel Margin="12,0,0,0" MaxWidth="300" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding BusyText}" TextWrapping="Wrap" />
+                                                        <TextBlock Text="{Binding BusyDetail}" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap"
+                                                                   Foreground="{StaticResource TertiaryTextBrush}">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding BusyDetail}" Value="">
+                                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </ControlTemplate>
+                                </ListBox.Template>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:RgbTargetItem}">
+                                        <DockPanel>
+                                            <TextBlock DockPanel.Dock="Left" Text="{Binding Glyph}" Width="22" Margin="0,2,8,0"
+                                                       FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="17"
+                                                       Foreground="{StaticResource AccentStrongBrush}" VerticalAlignment="Top" />
+                                            <StackPanel>
+                                                <DockPanel>
+                                                    <TextBlock DockPanel.Dock="Right" Text="{Binding ControlText}" FontSize="12"
+                                                               Margin="8,0,0,0" VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{StaticResource TertiaryTextBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsControlled}" Value="True">
+                                                                        <Setter Property="Foreground" Value="{StaticResource AccentStrongBrush}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                </DockPanel>
+                                                <TextBlock Text="{Binding Subtitle}" FontSize="12" Foreground="{StaticResource SecondaryTextBrush}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <!-- Live preview; dimmed while something else drives the LEDs. -->
+                                                <Image Source="{Binding Preview}" Height="10" Stretch="Fill" Margin="0,6,0,3"
+                                                       RenderOptions.BitmapScalingMode="NearestNeighbor">
+                                                    <Image.Style>
+                                                        <Style TargetType="Image">
+                                                            <Setter Property="Opacity" Value="0.35" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsControlled}" Value="True">
+                                                                    <Setter Property="Opacity" Value="1" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Image.Style>
+                                                </Image>
+                                                <TextBlock Text="{Binding EffectText}" FontSize="12" Foreground="{StaticResource TertiaryTextBrush}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" />
+
+                        <!-- Settings of the selected row -->
+                        <Border Grid.Column="2" Style="{StaticResource PanelBorder}" Padding="16,12">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ContentControl Content="{Binding Selected}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate DataType="{x:Type vm:RgbTargetItem}">
+                                            <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Glyph}" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                               FontSize="20" Foreground="{StaticResource AccentStrongBrush}"
+                                                               VerticalAlignment="Center" Margin="0,0,10,0" />
+                                                    <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <TextBlock Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,0,0" TextWrapping="Wrap">
+                                                    <Run Text="{Binding Subtitle, Mode=OneWay}" />
+                                                    <Run Text="·" />
+                                                    <Run Text="{Binding ControlText, Mode=OneWay}" />
+                                                </TextBlock>
+
+                                                <!-- All devices: sync -->
+                                                <StackPanel Margin="0,12,0,0" Visibility="{Binding IsAll, Converter={StaticResource BoolToVisibility}}">
+                                                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TertiaryTextBrush}" FontSize="12"
+                                                               Text="Devices with Follow All devices ticked show these settings, all in step." />
+                                                    <Button Content="Sync every device" Style="{StaticResource PrimaryActionButton}" Margin="0,8,0,0"
+                                                            HorizontalAlignment="Left" Click="RgbSyncAll_Click"
+                                                            ToolTip="Make every device follow these settings" />
+                                                </StackPanel>
+
+                                                <!-- One device: follow All devices or use its own settings -->
+                                                <StackPanel Margin="0,12,0,0" Visibility="{Binding IsDevice, Converter={StaticResource BoolToVisibility}}">
+                                                    <CheckBox Content="Follow All devices" IsChecked="{Binding FollowsAll}" Padding="6,0,0,0" />
+                                                    <Button Content="Use for every device" Margin="0,8,0,0" HorizontalAlignment="Left"
+                                                            Style="{StaticResource ActionButton}" Click="RgbUseForAll_Click"
+                                                            Visibility="{Binding ShowsOwnEditor, Converter={StaticResource BoolToVisibility}}"
+                                                            ToolTip="Copy these settings to All devices and make every device follow them" />
+                                                </StackPanel>
+
+                                                <ContentControl Content="{Binding Editor}" ContentTemplate="{StaticResource EffectEditorTemplate}"
+                                                                Margin="0,18,0,0"
+                                                                Visibility="{Binding ShowsOwnEditor, Converter={StaticResource BoolToVisibility}}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+
+                    <TextBlock Grid.Row="2" Text="{Binding Status}" Margin="2,10,2,0"
+                               Foreground="{StaticResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </TabItem>
         </TabControl>
 
-        <!-- AI assistant, shared by both tabs -->
+        <!-- AI assistant, shared by every tab -->
         <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource PanelBorder}" Width="470" Margin="10,0,0,0"
                 Visibility="{Binding Assistant.IsOpen, Converter={StaticResource BoolToVisibility}}">
             <views:AssistantPanel DataContext="{Binding Assistant}" />
