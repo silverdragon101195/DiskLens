@@ -1,12 +1,37 @@
 # SysLens
 
-A Windows system inspector built with WPF on .NET 10. It shows where disk space goes and how USB devices
-are wired together, with an AI assistant that explains any folder, file, device or hub you point it at, and
-runs lighting effects on every RGB device it can reach.
+A Windows system inspector built with WPF on .NET 10. It graphs any hardware sensor it can read and shows
+where disk space goes and how USB devices are wired together, with an AI assistant that explains any folder,
+file, device or hub you point it at.
 
 ![SysLens icon](Assets/SysLens.png)
 
 ## Features
+
+### Hardware Monitor
+
+- **Every sensor** – CPU, graphics cards, motherboard, drives, network adapters, fan controllers, power supplies
+  and batteries through LibreHardwareMonitor, plus RAM use, listed by device and kind with their live values and a
+  search. Network adapters are listed while they are up and have an address. Memory modules' own temperature
+  sensors are not read: they are reached over SMBus, which RGB memory controllers hold for long stretches.
+- **Frame rate** – the frame rate and frame time RivaTuner Statistics Server measures for the 3D application it
+  last saw in front, or for the busiest one while SysLens is in front. SysLens reads them from RTSS's shared
+  memory; it injects nothing into games.
+- **Graphs** – tick a sensor to graph it and drag a graph to move it. A graph is titled as the sensor tree names
+  it, the sensor and its group (CPU Package - Temperatures), over its device. It holds the last five minutes with
+  the lowest, average and highest reading, and shows the reading under the pointer. Lines are coloured by height:
+  violet at the bottom of the axis through blue, green and yellow to red at the top. **Clear history** empties
+  them.
+- **Saved layout** – the graphs shown and their order are written to `SysLens.settings.json` next to
+  `SysLens.exe` on every change, and nowhere else. `publish.bat` keeps that file when it rebuilds `publish`.
+- **Defaults** – sensors you have not ticked or cleared follow an MSI Afterburner on-screen display: CPU
+  temperature, power, clock (the fastest core, Core Max) and usage; for each GPU its temperature, power, power
+  percent, core and memory clocks, usage and memory used; RAM used; frame rate and frame time. **Reset to
+  defaults** forgets the graphs added, removed or moved.
+- **PawnIO** – CPU temperature, power and clocks and motherboard sensors are read through the PawnIO driver.
+  While it is missing the tab offers **Install PawnIO**, which installs it with winget (`namazso.PawnIO`).
+  LibreHardwareMonitor does not yet recognise every motherboard's sensor chip; such a board lists no sensors.
+- The tab comes first and opens with SysLens; every sensor is read once a second until SysLens closes.
 
 ### Disk
 
@@ -34,6 +59,9 @@ runs lighting effects on every RGB device it can reach.
 - **Live** – refreshes by itself shortly after a device is plugged in or removed.
 
 ### RGB
+
+The RGB tab is hidden and RGB is not started: `Visibility="Collapsed"` on its `TabItem` in `MainWindow.xaml`,
+and `MainWindow.Loaded` does not call `RgbViewModel.StartAsync`. Shown and started, it offers:
 
 - **Every device in one list** – ASUS Aura SDK devices (motherboard, memory, graphics card, ROG displays,
   mice, keyboards and whatever else Armoury Crate's plugins expose) and Windows Dynamic Lighting
@@ -65,6 +93,8 @@ Dark theme with a dark title bar throughout.
 - Administrator rights – the app relaunches itself through UAC when started unelevated
 - For the AI assistant: an OpenAI-compatible Chat Completions endpoint and API key
 - For RGB: the ASUS Aura SDK, which Armoury Crate installs, and/or Dynamic Lighting devices (Windows 11)
+- For the Hardware Monitor: the PawnIO driver for CPU and motherboard sensors (the tab installs it with winget),
+  and RivaTuner Statistics Server, which MSI Afterburner installs, for frame rate and frame time
 
 ## Build and run
 
@@ -101,8 +131,9 @@ needs it.
 | ------------- | ------------------------------------------------------------------------------------------------------------ |
 | `Scanning/`   | Parallel directory walker and the size tree it builds                                                        |
 | `Usb/`        | USB device record and Device Manager problem codes                                                           |
-| `ViewModels/` | MVVM view models for drives, results, the USB tree, RGB devices and the AI chat                              |
-| `Views/`      | AI assistant panel, colour picker, the Markdown renderer and value converters                                |
+| `Monitoring/` | Sensor reader over LibreHardwareMonitor, RTSS frame rate reader, default sensors, saved choices, PawnIO      |
+| `ViewModels/` | MVVM view models for drives, results, the USB tree, RGB devices, the sensor tree and graphs, and the AI chat |
+| `Views/`      | Hardware Monitor tab, sensor graph, AI assistant panel, colour picker, the Markdown renderer and converters  |
 | `Lighting/`   | Effect renderer and render loop, the ASUS Aura host process and its client, Dynamic Lighting devices         |
 | `Ai/`         | Config loader, streaming chat client and prompts                                                             |
 | `Native/`     | Win32 interop: elevation, backup privilege, dark title bar, signing root CA, USB enumeration, device changes |

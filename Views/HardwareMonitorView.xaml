@@ -1,0 +1,222 @@
+<UserControl x:Class="SysLens.Views.HardwareMonitorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SysLens.ViewModels"
+             xmlns:views="clr-namespace:SysLens.Views">
+    <UserControl.Resources>
+        <!-- The bar on the edge of a graph where a dragged one would land -->
+        <Style x:Key="DropBar" TargetType="Border">
+            <Setter Property="Width" Value="3" />
+            <Setter Property="CornerRadius" Value="1.5" />
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Margin="2,0,0,8">
+            <Button DockPanel.Dock="Right" Content="Reset to defaults" Padding="10,3" VerticalAlignment="Center"
+                    Click="ResetToDefaults_Click"
+                    ToolTip="Show only the default sensors, those of an MSI Afterburner on-screen display, in their own order, and forget the graphs added, removed or moved here" />
+            <Button DockPanel.Dock="Right" Content="Clear history" Padding="10,3" Margin="0,0,8,0" VerticalAlignment="Center"
+                    Click="ClearHistory_Click" ToolTip="Empty the graphs and start min, average and max again" />
+            <StackPanel>
+                <TextBlock Text="{Binding Summary}" TextTrimming="CharacterEllipsis" />
+                <TextBlock FontSize="12" Margin="0,2,0,0" Foreground="{StaticResource TertiaryTextBrush}"
+                           TextTrimming="CharacterEllipsis"
+                           Text="Tick a sensor to graph it and drag a graph to move it; graphs hold the last five minutes. Frame rate and frame time come from RivaTuner Statistics Server while a 3D application runs." />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Shown until the PawnIO driver is installed -->
+        <Border Grid.Row="1" Style="{StaticResource PanelBorder}" Margin="0,0,0,10"
+                Visibility="{Binding NeedsPawnIo, Converter={StaticResource BoolToVisibility}}">
+            <DockPanel>
+                <!-- E946: info glyph -->
+                <TextBlock DockPanel.Dock="Left" Text="&#xE946;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="18"
+                           Foreground="{StaticResource AccentStrongBrush}" Margin="2,1,12,0" VerticalAlignment="Top" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <Control Style="{StaticResource Spinner}" Width="20" Height="20" Margin="0,0,10,0"
+                             Visibility="{Binding IsInstallingPawnIo, Converter={StaticResource BoolToVisibility}}" />
+                    <Button Content="Install PawnIO" Style="{StaticResource AccentButton}" Padding="14,6"
+                            IsEnabled="{Binding IsIdle}" Click="InstallPawnIo_Click"
+                            ToolTip="Install the PawnIO driver with winget (package namazso.PawnIO)" />
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock TextWrapping="Wrap"
+                               Text="CPU temperature, power and clocks, and motherboard fans, voltages and temperatures need the PawnIO driver." />
+                    <TextBlock TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0" Foreground="{StaticResource TertiaryTextBrush}"
+                               Text="PawnIO is the signed driver LibreHardwareMonitor and FanControl read sensors through. Install adds it with winget; those sensors fill in right after." />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Sensors and the graphs of those shown; the splitter resizes the sensor list. -->
+        <Grid Grid.Row="2" views:SidePane.IsEnabled="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="440" MinWidth="280" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" MinWidth="360" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Sensors -->
+            <Border Style="{StaticResource PanelBorder}" Padding="4">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top" Margin="6,6,6,8">
+                        <TextBox x:Name="SearchBox" Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="Show only sensors whose name, kind or device holds every word" />
+                        <TextBlock Text="Search sensors" Margin="11,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                   Foreground="{StaticResource TertiaryTextBrush}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <TreeView ItemsSource="{Binding Hardware}" VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling">
+                        <TreeView.ItemContainerStyle>
+                            <Style TargetType="TreeViewItem">
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}" />
+                                <Setter Property="Padding" Value="2,2" />
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            </Style>
+                        </TreeView.ItemContainerStyle>
+                        <TreeView.Resources>
+                            <HierarchicalDataTemplate DataType="{x:Type vm:HardwareItem}" ItemsSource="{Binding Children}">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="{Binding Glyph}" Width="24" FontSize="15" VerticalAlignment="Center"
+                                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                               Foreground="{StaticResource AccentStrongBrush}" />
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Foreground="{StaticResource DeviceNameBrush}" />
+                                </StackPanel>
+                            </HierarchicalDataTemplate>
+                            <HierarchicalDataTemplate DataType="{x:Type vm:SensorGroupItem}" ItemsSource="{Binding Sensors}">
+                                <TextBlock Text="{Binding Name}" Foreground="{StaticResource SecondaryTextBrush}" />
+                            </HierarchicalDataTemplate>
+                            <DataTemplate DataType="{x:Type vm:SensorItem}">
+                                <CheckBox IsChecked="{Binding IsShown}" Padding="6,0,0,0" ToolTip="Graph this sensor">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="200" />
+                                            <ColumnDefinition Width="100" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="1" Text="{Binding ValueText}" TextAlignment="Right"
+                                                   Foreground="{StaticResource SecondaryTextBrush}" />
+                                    </Grid>
+                                </CheckBox>
+                            </DataTemplate>
+                        </TreeView.Resources>
+                    </TreeView>
+                </DockPanel>
+            </Border>
+
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" />
+
+            <!-- Graphs -->
+            <Grid Grid.Column="2">
+                <!-- A graph dropped on the empty space after the others goes last. -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                              Background="Transparent" AllowDrop="True" DragOver="Graphs_DragOver" Drop="Graphs_Drop">
+                    <ItemsControl ItemsSource="{Binding Shown}" Focusable="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <views:TilePanel MinTileWidth="340" Spacing="10" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:SensorItem}">
+                                <Border Padding="14,10,10,12" AllowDrop="True"
+                                        PreviewMouseLeftButtonDown="Graph_PreviewMouseLeftButtonDown" PreviewMouseMove="Graph_PreviewMouseMove"
+                                        DragOver="Graph_DragOver" DragLeave="Graph_DragLeave" Drop="Graph_Drop">
+                                    <Border.Style>
+                                        <Style TargetType="Border" BasedOn="{StaticResource PanelBorder}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDragged}" Value="True">
+                                                    <Setter Property="Opacity" Value="0.4" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid>
+                                        <DockPanel>
+                                            <DockPanel DockPanel.Dock="Top">
+                                                <!-- E711: close glyph -->
+                                                <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE711;"
+                                                        FontSize="11" Padding="5,4" VerticalAlignment="Top"
+                                                        ToolTip="Remove this graph" Click="HideSensor_Click" />
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Source}" FontSize="12" Margin="0,1,0,0"
+                                                               Foreground="{StaticResource DeviceNameBrush}" TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                            </DockPanel>
+                                            <TextBlock DockPanel.Dock="Top" Text="{Binding ValueText}" FontSize="28" FontWeight="SemiBold"
+                                                       Margin="0,4,0,4" />
+                                            <TextBlock DockPanel.Dock="Bottom" Text="{Binding StatsText}" FontSize="12" Margin="0,6,0,0"
+                                                       Foreground="{StaticResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" />
+                                            <views:SensorGraph Sensor="{Binding}" Height="104" />
+                                        </DockPanel>
+
+                                        <!-- Drop bars, on the card's inner edges -->
+                                        <Border HorizontalAlignment="Left" Margin="-13,-9,0,-11">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource DropBar}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DropSide}" Value="Before">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                        <Border HorizontalAlignment="Right" Margin="0,-9,-9,-11">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource DropBar}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DropSide}" Value="After">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding IsReading, Converter={StaticResource BoolToVisibility}}">
+                    <Control Style="{StaticResource Spinner}" />
+                    <TextBlock Text="Reading sensors…" Margin="12,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock Text="Tick sensors on the left to graph them here." HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{StaticResource TertiaryTextBrush}"
+                           Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}" />
+            </Grid>
+        </Grid>
+
+        <TextBlock Grid.Row="3" Text="{Binding Status}" Margin="2,10,2,0"
+                   Foreground="{StaticResource SecondaryTextBrush}" TextTrimming="CharacterEllipsis" />
+    </Grid>
+</UserControl>

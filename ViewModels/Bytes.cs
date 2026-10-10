@@ -6,14 +6,16 @@ public static class Bytes
 
     public static string Format(long bytes)
     {
-        double value = bytes;
-        var unit = 0;
-        while (value >= 1024 && unit < Units.Length - 1)
-        {
-            value /= 1024;
-            unit++;
-        }
+        var (unit, size) = UnitFor(bytes);
+        return size == 1 ? $"{bytes} B" : $"{bytes / size:0.0} {unit}";
+    }
 
-        return unit == 0 ? $"{bytes} B" : $"{value:0.0} {Units[unit]}";
+    /// <summary>The largest unit <paramref name="bytes"/> holds at least one of, and that unit's size in bytes.</summary>
+    public static (string Unit, double Size) UnitFor(double bytes)
+    {
+        var unit = 0;
+        for (var value = Math.Abs(bytes); value >= 1024 && unit < Units.Length - 1; value /= 1024)
+            unit++;
+        return (Units[unit], Math.Pow(1024, unit));
     }
 }

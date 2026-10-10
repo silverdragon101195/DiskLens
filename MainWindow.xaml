@@ -9,14 +9,6 @@
         Background="{StaticResource WindowBrush}" Foreground="{StaticResource TextBrush}" FontFamily="Segoe UI" FontSize="14">
 
     <Window.Resources>
-        <Style x:Key="PanelBorder" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource PanelBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Padding" Value="12" />
-        </Style>
-
         <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Padding" Value="14,6" />
             <Setter Property="Margin" Value="0,0,8,0" />
@@ -234,6 +226,11 @@
         </DockPanel>
 
         <TabControl Grid.Row="1">
+            <!-- Sensors of every device, and graphs of the ones shown; first, so it opens with SysLens -->
+            <TabItem Header="Hardware Monitor" DataContext="{Binding Monitor}">
+                <views:HardwareMonitorView />
+            </TabItem>
+
             <!-- Disk usage -->
             <TabItem Header="Disk">
                 <Grid>
@@ -490,8 +487,9 @@
                 </Grid>
             </TabItem>
 
-            <!-- RGB lighting -->
-            <TabItem Header="RGB" DataContext="{Binding Rgb}" IsSelected="{Binding IsActive, Mode=OneWayToSource}">
+            <!-- RGB lighting: hidden, and MainWindow does not start it (RgbViewModel.StartAsync). -->
+            <TabItem Header="RGB" DataContext="{Binding Rgb}" IsSelected="{Binding IsActive, Mode=OneWayToSource}"
+                     Visibility="Collapsed">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />

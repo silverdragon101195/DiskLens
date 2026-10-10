@@ -26,4 +26,9 @@
     <None Update="Gemini_BYOK.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- From 0.9.7 on, Data sensors report bytes (0.9.6 reported GB and MB); ViewModels/SensorFormat relies on it. -->
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.7-pre752" />
+  </ItemGroup>
+
 </Project>

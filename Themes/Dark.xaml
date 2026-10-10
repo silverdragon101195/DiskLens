@@ -23,6 +23,18 @@
     <SolidColorBrush x:Key="AiIconBrush" Color="#F5C542" />
     <SolidColorBrush x:Key="AiIconHoverBrush" Color="#FFE08A" />
     <SolidColorBrush x:Key="SelectionBrush" Color="#2F4A73" />
+    <SolidColorBrush x:Key="DeviceNameBrush" Color="#E8C547" />
+
+    <!-- Hardware Monitor graphs are coloured by height: violet at the bottom of the axis, red at the top. -->
+    <GradientStopCollection x:Key="GraphGradientStops">
+        <GradientStop Offset="0" Color="#8B5CF6" />
+        <GradientStop Offset="0.17" Color="#3B82F6" />
+        <GradientStop Offset="0.33" Color="#06B6D4" />
+        <GradientStop Offset="0.5" Color="#22C55E" />
+        <GradientStop Offset="0.67" Color="#EAB308" />
+        <GradientStop Offset="0.83" Color="#F97316" />
+        <GradientStop Offset="1" Color="#EF4444" />
+    </GradientStopCollection>
 
     <!-- Built-in control templates (TreeViewItem selection, etc.) read these system keys dynamically. -->
     <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#2F4A73" />
@@ -86,6 +98,15 @@
     </Style>
 
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+    <!-- Panel: a rounded card on the window background -->
+    <Style x:Key="PanelBorder" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource PanelBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="12" />
+    </Style>
 
     <!-- Borderless glyph button (Segoe Fluent Icons code point as Content) -->
     <Style x:Key="IconButton" TargetType="Button">
@@ -299,17 +320,24 @@
         </Setter>
     </Style>
 
+    <!-- ScrollViewer: a click focuses it; no dashed focus rectangle around the whole pane -->
+    <Style TargetType="ScrollViewer">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    </Style>
+
     <!-- TreeView -->
     <Style TargetType="TreeView">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     </Style>
 
     <Style TargetType="ListBox">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
     </Style>
 
     <!-- GridSplitter: an invisible gap that shows a thin line along it on hover and while dragging.

@@ -31,6 +31,8 @@ public sealed class MainViewModel : ObservableObject
 
     public RgbViewModel Rgb { get; } = new();
 
+    public MonitorViewModel Monitor { get; } = new();
+
     public string Status
     {
         get => _status;

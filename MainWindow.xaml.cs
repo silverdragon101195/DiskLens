@@ -16,9 +16,19 @@ public partial class MainWindow : Window
         InitializeComponent();
         _viewModel = new MainViewModel(DescribePrivileges());
         DataContext = _viewModel;
-        Loaded += async (_, _) => await Task.WhenAll(_viewModel.Usb.RefreshAsync(), _viewModel.Rgb.StartAsync());
-        // Hands the ASUS Aura devices back to Armoury Crate and stops the Aura host process.
-        Closed += (_, _) => _viewModel.Rgb.Dispose();
+        // The RGB tab is hidden, so RGB is not started: no Aura host process, and Dynamic Lighting devices are not
+        // taken over while SysLens is in front.
+        Loaded += async (_, _) =>
+        {
+            _viewModel.Monitor.Start();
+            await _viewModel.Usb.RefreshAsync();
+        };
+        Closed += (_, _) =>
+        {
+            // Stops the lighting render thread, and hands any ASUS Aura devices back to Armoury Crate.
+            _viewModel.Rgb.Dispose();
+            _viewModel.Monitor.Dispose();
+        };
     }
 
     protected override void OnSourceInitialized(EventArgs e)
