@@ -22,7 +22,7 @@ public abstract class MonitorNode : ObservableObject
     }
 }
 
-/// <summary>A device: the devices it contains, then its sensors grouped by kind.</summary>
+/// <summary>A device: its sensors grouped by kind, then the devices it contains.</summary>
 public sealed class HardwareItem(HardwareInfo info, string glyph, IReadOnlyList<MonitorNode> children) : MonitorNode
 {
     public string Key => info.Key;

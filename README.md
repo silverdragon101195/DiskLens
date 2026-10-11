@@ -14,6 +14,11 @@ file, device or hub you point it at.
   and batteries through LibreHardwareMonitor, plus RAM use, listed by device and kind with their live values and a
   search. Network adapters are listed while they are up and have an address. Memory modules' own temperature
   sensors are not read: they are reached over SMBus, which RGB memory controllers hold for long stretches.
+- **Drives** – one per disk Windows numbers, as Task Manager lists them, named with its drive letters
+  (Samsung SSD 970 EVO Plus 2TB (C: D:)) and in drive letter order. Active time, read speed and write speed come
+  from the counters Windows keeps for Task Manager, so drives behind Intel RST and RAID volumes have them too. A
+  RAID volume holds the drives it is made of, each named with its controller port, when the RAID driver reports
+  them through CSMI, as Intel RST does; otherwise those drives are listed on their own.
 - **Frame rate** – the frame rate and frame time RivaTuner Statistics Server measures for the 3D application it
   last saw in front, or for the busiest one while SysLens is in front. SysLens reads them from RTSS's shared
   memory; it injects nothing into games.
@@ -84,7 +89,8 @@ it, whether it can be deleted and how to remove it safely. For a USB device or h
 its place in the hub chain or its status is a problem, and how to fix it. Answers stream in as Markdown
 and you can keep the conversation going.
 
-Dark theme with a dark title bar throughout.
+Dark theme with a dark title bar throughout. Panes resized with a splitter, on any tab, keep their size from one
+run to the next: it is written to `SysLens.settings.json` with the graphs.
 
 ## Requirements
 
@@ -127,17 +133,17 @@ needs it.
 
 ## Project layout
 
-| Folder        | Contents                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------ |
-| `Scanning/`   | Parallel directory walker and the size tree it builds                                                        |
-| `Usb/`        | USB device record and Device Manager problem codes                                                           |
-| `Monitoring/` | Sensor reader over LibreHardwareMonitor, RTSS frame rate reader, default sensors, saved choices, PawnIO      |
-| `ViewModels/` | MVVM view models for drives, results, the USB tree, RGB devices, the sensor tree and graphs, and the AI chat |
-| `Views/`      | Hardware Monitor tab, sensor graph, AI assistant panel, colour picker, the Markdown renderer and converters  |
-| `Lighting/`   | Effect renderer and render loop, the ASUS Aura host process and its client, Dynamic Lighting devices         |
-| `Ai/`         | Config loader, streaming chat client and prompts                                                             |
-| `Native/`     | Win32 interop: elevation, backup privilege, dark title bar, signing root CA, USB enumeration, device changes |
-| `Themes/`     | Dark theme resources                                                                                         |
+| Folder        | Contents                                                                                                                                            |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Scanning/`   | Parallel directory walker and the size tree it builds                                                                                               |
+| `Usb/`        | USB device record and Device Manager problem codes                                                                                                  |
+| `Monitoring/` | Sensor reader over LibreHardwareMonitor, disks with their activity and RAID members, RTSS frame rate reader, default sensors, saved choices, PawnIO |
+| `ViewModels/` | MVVM view models for drives, results, the USB tree, RGB devices, the sensor tree and graphs, and the AI chat                                        |
+| `Views/`      | Hardware Monitor tab, sensor graph, AI assistant panel, colour picker, the Markdown renderer, converters and pane sizes                             |
+| `Lighting/`   | Effect renderer and render loop, the ASUS Aura host process and its client, Dynamic Lighting devices                                                |
+| `Ai/`         | Config loader, streaming chat client and prompts                                                                                                    |
+| `Native/`     | Win32 interop: elevation, backup privilege, dark title bar, signing root CA, USB enumeration, device changes, disks and their RAID volumes          |
+| `Themes/`     | Dark theme resources                                                                                                                                |
 
 ## Notes
 

@@ -128,7 +128,7 @@
                 </DockPanel>
             </Border>
 
-            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" />
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" views:PaneSizes.Key="HardwareMonitor" />
 
             <!-- Graphs -->
             <Grid Grid.Column="2">

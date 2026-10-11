@@ -11,7 +11,7 @@ namespace SysLens.ViewModels;
 public sealed class MonitorViewModel : ObservableObject, IDisposable
 {
     private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
-    private readonly MonitorSettings _settings = MonitorSettings.Load();
+    private readonly MonitorSettings _settings = AppSettings.Current.HardwareMonitor;
 
     // Kept when a device goes, so its sensors keep their history and choices if it comes back.
     private readonly Dictionary<string, SensorItem> _sensors = [];
@@ -180,10 +180,11 @@ public sealed class MonitorViewModel : ObservableObject, IDisposable
             return;
 
         // A new layout comes whenever devices may have changed, such as on any network address change; the tree,
-        // with its scroll position, is rebuilt only when the sensors did change.
+        // with its scroll position, is rebuilt only when the devices, their names (a disk's drive letters) or the
+        // sensors did change.
         if (snapshot.Layout != _layout)
         {
-            if (_layout is not null && snapshot.Layout.Sensors.Select(s => s.Key).SequenceEqual(_layout.Sensors.Select(s => s.Key)))
+            if (_layout is not null && snapshot.Layout.IsSameTree(_layout))
                 _layout = snapshot.Layout;
             else
                 BuildTree(snapshot.Layout);
@@ -223,9 +224,6 @@ public sealed class MonitorViewModel : ObservableObject, IDisposable
     private HardwareItem BuildHardware(HardwareInfo info, HashSet<string> collapsed, List<SensorItem> ordered)
     {
         var children = new List<MonitorNode>();
-        foreach (var subHardware in info.SubHardware)
-            children.Add(BuildHardware(subHardware, collapsed, ordered));
-
         foreach (var group in info.Sensors.GroupBy(s => s.Kind).OrderBy(g => SensorFormat.SortOrder(g.Key)))
         {
             var items = group.Select(sensor => ItemFor(info, sensor)).ToList();
@@ -233,6 +231,10 @@ public sealed class MonitorViewModel : ObservableObject, IDisposable
             var key = $"{info.Key}|{group.Key}";
             children.Add(new SensorGroupItem(key, SensorFormat.GroupName(group.Key), items) { IsExpanded = !collapsed.Contains(key) });
         }
+
+        // The devices it contains follow its own sensors: a RAID volume shows its activity before its drives.
+        foreach (var subHardware in info.SubHardware)
+            children.Add(BuildHardware(subHardware, collapsed, ordered));
 
         return new HardwareItem(info, GlyphOf(info.Kind), children) { IsExpanded = !collapsed.Contains(info.Key) };
     }
@@ -281,8 +283,8 @@ public sealed class MonitorViewModel : ObservableObject, IDisposable
 
     private void SaveSettings()
     {
-        if (!_settings.Save())
-            Status = $"Could not write {MonitorSettings.FilePath}; the graphs stay as they are until SysLens closes.";
+        if (!AppSettings.Current.Save())
+            Status = $"Could not write {AppSettings.FilePath}; the graphs stay as they are until SysLens closes.";
     }
 
     /// <summary>

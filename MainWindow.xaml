@@ -283,7 +283,7 @@
                             </DockPanel>
                         </Border>
 
-                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" />
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" views:PaneSizes.Key="Disk" />
 
                         <!-- Results -->
                         <Border Grid.Column="2" Style="{StaticResource PanelBorder}" Padding="4">
@@ -452,7 +452,7 @@
                         </TreeView>
                     </Border>
 
-                    <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" ResizeDirection="Rows" />
+                    <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" ResizeDirection="Rows" views:PaneSizes.Key="Usb" />
 
                     <!-- Devices no longer connected -->
                     <Border Grid.Row="3" Style="{StaticResource PanelBorder}" Padding="4">
@@ -608,7 +608,7 @@
                             </ListBox>
                         </Border>
 
-                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" />
+                        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" ResizeDirection="Columns" views:PaneSizes.Key="Rgb" />
 
                         <!-- Settings of the selected row -->
                         <Border Grid.Column="2" Style="{StaticResource PanelBorder}" Padding="16,12">
